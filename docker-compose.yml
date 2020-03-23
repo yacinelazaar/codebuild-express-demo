@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  express:
+    image: "${REGISTRY}/yassinelaz/express-demo:${TAG}"
+    networks:
+      - nginx-proxy
+    environment:
+      - VIRTUAL_HOST=test.site.local
+      - VIRTUAL_PORT=3000
+    container_name: express
+    command: ["npm", "run", "dev"]
+
+networks:
+  nginx-proxy:
+    external: true

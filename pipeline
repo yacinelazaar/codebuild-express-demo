@@ -1,0 +1,96 @@
+pipeline {
+    environment {
+        image = "yassinelaz/express-demo"
+        registryCredential = 'dockerhub'
+        sonarqube = tool name: 'SonarScanner'
+    }
+    agent any
+    stages {
+        stage('Clone from source') {
+            steps {
+                script {
+                    git branch: 'master',
+                    credentialsId: '1528ef1b-d790-4737-9fd5-486b5c45d5f3',
+                    url: 'ssh://git@gitlab:22/yassinelaz/express-demo.git'
+                }
+            }
+        }
+        stage("SonarQube analysis") {
+            steps {
+                withSonarQubeEnv('Sonarqube') {
+                    sh "${sonarqube}/bin/sonar-scanner"
+                }
+            }
+        }   
+        stage("SonarQube quality gate") {
+            steps {
+                script {
+                    sleep(10)
+                    timeout(time: 1, unit: 'HOURS') { // Just in case something goes wrong, pipeline will be killed after a timeout
+                        qg = waitForQualityGate() // Reuse taskId previously collected by withSonarQubeEnv
+                        if (qg.status != 'OK') {
+                          error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                        }
+                    }
+                }
+            }
+        }
+        stage('Build and start image') {
+            steps {
+                script {
+                    packageJSON = readJSON file: 'package.json'
+                    packageJSONVersion = packageJSON.version
+                    echo packageJSONVersion
+                    docker.build image + ':' + packageJSONVersion
+                    docker.build image + ':latest'
+                    sh "TAG=${packageJSONVersion} docker-compose up -d" // Unecessary to run the tests
+                }
+            }
+        }
+        stage('Test image') {
+            steps {
+                script {
+                    sh "docker exec express npm run test"
+                }
+            }
+        }
+        stage('Push image') {
+            steps {
+                script {
+                    withCredentials([usernamePassword( credentialsId: registryCredential, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        docker.withRegistry('', registryCredential) {
+                        sh "docker login -u ${USERNAME} -p ${PASSWORD}"
+                        sh "docker push ${image}:${packageJSONVersion}" 
+                        sh "docker push ${image}:latest" 
+                        }
+                    }
+                }
+            }
+        }
+        stage('Run staging') {
+            steps {
+                script {
+                    sh "TAG=${packageJSONVersion} docker-compose -f ./docker-compose-stage.yml up -d"
+                }
+            }
+        }
+        stage('Approve prod deployment for this build?') {
+            steps {
+                script {
+                    if (currentBuild.result == null || currentBuild.result == 'SUCCESS') {
+                        timeout(time: 3, unit: 'MINUTES') {
+                            input message:'Approve deployment?', submitter: 'qa-001'
+                        }
+                    }
+                }
+            }
+        }
+        stage('Run production') {
+            steps {
+                script {
+                    sh "TAG=${packageJSONVersion} docker-compose -f ./docker-compose-prod.yml up -d"
+                }
+            }
+        }
+    }
+}

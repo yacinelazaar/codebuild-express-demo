@@ -1,0 +1,26 @@
+{
+  "name": "express-demo",
+  "version": "1.0.5",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js",
+    "stage": "NODE_ENV=stage node index.js",
+    "prod": "NODE_ENV=prod node index.js",
+    "test": "./node_modules/.bin/mocha ./test/test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://gitlab.site.local/yassinelaz/express-demo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4"
+  },
+  "devDependencies": {
+    "custom-env": "^1.0.0",
+    "mocha": "^1.20.1",
+    "supertest": "0.13.0"
+  }
+}

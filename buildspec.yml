@@ -1,0 +1,56 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - npm update # install mocha for testing
+  # pre_build:
+  #   commands:
+  #     - command
+  #   finally:
+  #     - command
+  build:
+    # run-as: Linux-user-name
+    commands:
+      - make test
+    # finally:
+      # - command
+  # post_build:
+    # run-as: Linux-user-name
+    # commands:
+    #   - command
+    # finally:
+    #   - command
+# reports:
+#   report-name-or-arn:
+#     files:
+#       - location
+#       - location
+#     base-directory: location
+#     discard-paths: yes
+#     file-format: JunitXml | CucumberJson | VisualStudioTrx | TestNGXml
+# artifacts:
+#   files:
+#     - location
+#     - location
+#   name: artifact-name
+#   discard-paths: yes
+#   base-directory: location
+#   secondary-artifacts:
+#     artifactIdentifier:
+#       files:
+#         - location
+#         - location
+#       name: secondary-artifact-name
+#       discard-paths: yes
+#       base-directory: location
+#     artifactIdentifier:
+#       files:
+#         - location
+#         - location
+#       discard-paths: yes
+#       base-directory: location
+# cache:
+#   paths:
+#     - path
+#     - path

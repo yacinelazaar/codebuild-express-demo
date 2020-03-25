@@ -12,7 +12,7 @@ phases:
   build:
     # run-as: Linux-user-name
     commands:
-      - make test
+      - npm test
     # finally:
       # - command
   # post_build:

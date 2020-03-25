@@ -3,7 +3,7 @@ const app = require('../index')
 
 describe('Unit testing the / route', function() {
 
-    it('should return OK status', function() {
+    it('Should return OK status', function() {
       request(app)
 		.get('/')
 		.expect(200)

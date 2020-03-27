@@ -6,7 +6,7 @@ describe('Unit testing the / route', function() {
     it('Should return OK status', function() {
       request(app)
 		.get('/')
-		.expect(400)
+		.expect(200)
 		.end(function(err, res) {
 			if (err) throw err;
 		});
